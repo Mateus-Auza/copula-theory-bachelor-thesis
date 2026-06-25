@@ -1,1 +1,1476 @@
+\documentclass[a4paper,11pt]{amsbook}
 
+
+%Choix de la langue : Français
+\usepackage[francais]{babel}
+
+%Pour utiliser des accents normalement
+%\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}  %Découchez si vous utilisez un encodage utf-8
+\usepackage[T1]{fontenc}
+\usepackage{pifont}
+
+%Police URW Schoolbook L
+\usepackage{fouriernc}
+
+%Packages mathématiques
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amscd}
+
+%Chargement de amsrefs
+\usepackage[abbrev,backrefs]{amsrefs}
+
+%Pour charger des figures
+\usepackage{graphicx}
+
+%Pour créer un index à la fin du mémoire
+%\usepackage{makeidx}
+
+%Pour numéroter les équations par chapitre
+\numberwithin{equation}{chapter}
+
+%Environnements des théorèmes
+\newtheorem{theoreme}			     {Théorème}	[chapter]
+\newtheorem{proposition}[theoreme]	 {Proposition}	
+\newtheorem{corollaire}	[theoreme]	 {Corollaire}	
+\newtheorem{lemme}	    [theoreme]	 {Lemme}		
+\newtheorem{definition}	[theoreme]   {Définition}
+\theoremstyle{definition}
+\newtheorem{exemple}	[theoreme]   {Exemple}
+\newtheorem{contreexemple}[theoreme]{Contre-exemple}
+\newtheorem{remark}[theoreme]{Remarque}
+\newtheorem{probleme}	             {Problème}[chapter]
+
+%Changement d'espace interlignes
+\renewcommand{\baselinestretch}{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Insérez ici vos macros
+% Par exemple, pour avoir l'ensemble des nombres réels
+%\newcommand{\R}{\mathbb{R}}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tikz}
+
+
+
+
+
+
+
+\title[Titre court]{Introduction aux copules et leur structure de dépendance}
+
+\begin{document}
+
+
+\frontmatter
+
+\author{Mateus Felipe Auza Cruz}
+
+
+\address{
+\vfill{}
+\begin{center}
+Promoteur: Karim Barigou
+\end{center}
+\vfill
+\begin{center}
+Université catholique de Louvain\break\indent
+Faculté des sciences\break\indent
+École de Mathématique\break\indent{}
+2024--2025
+\end{center}
+%
+}
+
+
+%Création de la page de garde
+\maketitle
+
+% Table de matière (crée automatiquement par LaTeX)
+\tableofcontents
+
+% Début du texte principal
+\mainmatter{}
+
+\maketitle
+
+
+
+\chapter*{Introduction}
+
+Avez-vous déjà remis en question les limitations du coefficient de corrélation de Pearson ? Par exemple, saviez-vous que ce coefficient est nul pour le vecteur aléatoire $(X, X^2)$ lorsque $X$ suit une loi normale centrée réduite, alors même qu’il existe une dépendance évidente entre les deux composantes ? Ce type de paradoxe soulève une question fondamentale : la corrélation de Pearson est-elle suffisante pour décrire toutes les formes de dépendance entre variables aléatoires ?
+
+Ces interrogations constituent le point de départ de ce mémoire. Nous nous demandons s’il existe d’autres types de mesures de dépendance, et surtout, s’il existe un objet purement mathématique permettant de modéliser cette dépendance de manière plus générale. Si tel est le cas, comment peut-on l’appliquer rigoureusement à l’étude des variables aléatoires ?
+
+Dans ce mémoire, notre objectif est d’explorer cet objet mathématique : la \emph{copule}. Nous en présenterons les fondements, ses propriétés, ses avantages ainsi que ses limitations. Nous verrons comment les copules permettent de modéliser des formes de dépendance que le coefficient de Pearson ne peut pas capturer.
+
+La structure de notre travail est la suivante :\\
+La première partie, constituée des chapitres 1 et 2, introduit les copules et met en évidence leur rôle central dans l’étude de la dépendance entre variables aléatoires.
+La deuxième partie, formée des chapitres 3 et 4, met en lumière les limites de ces outils dans la modélisation de la dépendance, et propose des alternatives fondées sur les copules, telles que le tau de Kendall et le rho de Spearman.
+
+
+\medskip
+
+Ce mémoire s’appuie principalement sur les références suivantes : la source~\cite{nelsen} m'a servi comme base tout au long du travail ; la source \cite{marshall} m’a été précieuse pour la compréhension du théorème de Marshall ; les sources \cite{embrechts} et \cite{lafortelle} m’ont aidé pour les résultats sur les quasi-inverses ; enfin, les sources \cite{kuleuven} et \cite{handbook} m’ont inspiré la structuration de la deuxième partie.
+
+Ce travail a été rédigé dans le souci de minimiser les prérequis. Il est conçu pour être accessible à toute personne disposant d’une base solide en mathématiques, sans connaissance approfondie préalable des copules. Néanmoins, une familiarité avec les contenus suivants est souhaitable :
+\begin{itemize}
+\item Analyse mathématique: Différentiation – LMAT1122
+\item Analyse mathématique: Intégration - LMAT1221
+\item Calcul de probabilités et analyse statistique - LMAT1271
+\item Théorie des probabilités - LMAT1371 (recommandée mais non indispensable)
+\end{itemize}
+
+\newpage
+\chapter{Introduction aux copules}
+
+\section{Notations et prérequis} 
+L’objectif de cette section est d’introduire la notion de fonction 2-monotone, de fonction ancrée, ainsi que celle de fonction de répartition au sens mathématique, et de présenter quelques résultats sur les quasi-inverses.
+Ce chapitre sera un peu dense en définitions et en théorèmes, mais ces résultats nous seront utiles par la suite. Commençons par introduire quelques notations.
+Nous notons :
+\begin{itemize}
+    \item $\mathbb{R}$ : la droite réelle ordinaire $(-\infty, \infty)$,
+    \item $\overline{\mathbb{R}}$ : la droite réelle étendue $[-\infty, \infty]$,
+    \item $\overline{\mathbb{R}}^2 = \overline{\mathbb{R}} \times \overline{\mathbb{R}}$ : le plan réel étendu.
+    \item Un \textit{rectangle} dans $\overline{\mathbb{R}}^2$ est le produit cartésien de deux intervalles fermés :
+\[
+B = [x_1, x_2] \times [y_1, y_2].
+\]
+    \item Les sommets de $B$ sont les points $(x_1, y_1)$, $(x_1, y_2)$, $(x_2, y_1)$ et $(x_2, y_2)$.
+    \item Le \textit{carré unité} $I^2$ est défini par $I \times I$, où $I = [0,1]$.  
+\end{itemize}
+
+\begin{definition}[2-monotonie]\label{def:2-monotonie}
+Soient \( S_1, S_2 \) deux sous-ensembles non vides de \( \overline{\mathbb{R}} \), et soit \( H : S_1 \times S_2 \to \mathbb{R} \) une fonction à deux variables et \( B = [x_1, x_2] \times [y_1, y_2] \), avec \( x_1 < x_2 \) et \( y_1 < y_2 \).
+Le \textit{volume \( H \)} du rectangle \( B \) est défini par :
+
+\[
+V_H(B) = H(x_2, y_2) - H(x_1, y_2) - H(x_2, y_1) + H(x_1, y_1).
+\]
+
+On dit que la fonction \( H \) est \textbf{2-monotone} si, pour tout rectangle \( B \subseteq S_1 \times S_2\), on a :
+
+\[
+V_H(B) \geq 0.
+\]
+
+\end{definition}
+
+\begin{lemme}\label{lem:premier}
+Les fonctions suivantes définies sur \( I^2 = [0,1]^2 \) sont \(2\)-monotones :
+\[
+\begin{aligned}
+H_1(x, y) &= \min(x, y), \\
+H_2(x, y) &= \max(x + y - 1, 0), \\
+H_3(x, y) &= x y.
+\end{aligned}
+\]
+\end{lemme}
+
+\begin{proof}
+La démonstration ensuit de la définition~\ref{def:2-monotonie}.
+\end{proof}
+Cet lemme sera important pour la suite.
+
+\begin{definition}[Fonction ancrée et fonctions marginales]\label{def:fonc_ancree_marginales}
+
+Soient \( S_1, S_2 \) deux sous-ensembles de \( \overline{\mathbb{R}} \), et soit \( H : S_1 \times S_2 \to \mathbb{R} \) une fonction.
+
+\begin{itemize}
+  \item On suppose que \( S_1 \) admet un plus petit élément \( a_1 \) et que \( S_2 \) admet un plus petit élément \( a_2 \).  
+  
+  On dit que \( H \) est \textbf{ancrée} si :
+  \[
+  H(x, a_2) = 0 \quad \text{et} \quad H(a_1, y) = 0 \quad \text{pour tout } (x, y) \in S_1 \times S_2.
+  \]
+  
+  \item Si de plus \( S_1 \) possède un plus grand élément \( b_1 \) et \( S_2 \) un plus grand élément \( b_2 \), alors on dit que \( H \) possède des \textbf{fonctions marginales}, définies par :
+  \[
+  F(x) := H(x, b_2), \quad \text{pour tout } x \in S_1,
+  \]
+  \[
+  G(y) := H(b_1, y), \quad \text{pour tout } y \in S_2.
+  \]
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Support d'une fonction]\label{def:supp}
+Soient \( S_1 \times S_2 \subseteq \overline{\mathbb{R}} \times \overline{\mathbb{R}} \) et soit \( H : S_1 \times S_2 \to \mathbb{R} \) une fonction. Le \textbf{support} de \( H \), noté \( \operatorname{supp}(H) \), est défini par :
+\[
+\operatorname{supp}(H) := \overline{\left\{ (x, y) \in S_1 \times S_2 \;:\; H(x, y) \neq 0 \right\}}.
+\]
+\end{definition}
+
+\subsection{Fonctions de répartitions marginales et jointes}
+
+\begin{definition}\label{def:fonc_rep_uni}
+Une fonction de répartition est une fonction \( F : \overline{\mathbb{R}} \to [0,1] \) telle que:
+\begin{enumerate}
+    \item \( F \) est non-décroissante,
+    \item \( F(-\infty) = 0 \) et \( F(\infty) = 1 \).
+\end{enumerate}
+\end{definition}
+
+\begin{definition}\label{def:fonc_rep_jointe}
+Une \textbf{fonction de répartition jointe} est une fonction \( H : \overline{\mathbb{R}}^2 \to [0,1] \) telle que, pour tout \( (x, y) \in \overline{\mathbb{R}}^2 \), les conditions suivantes sont satisfaites :
+\begin{enumerate}
+    \item \( H \) est \emph{2-monotone},
+    \item Ancrage et conditions aux bornes :
+    \[
+    H(x, -\infty) = H(-\infty, y) = 0 \quad \text{et} \quad H(+\infty, +\infty) = 1.
+    \]
+\end{enumerate}
+\end{definition}
+
+De plus, comme \( \text{Dom}(H) = \overline{\mathbb{R}}^2\), elle admet comme fonctions marginales les fonctions suivantes :
+\[
+F(x) = H(x, +\infty), \qquad G(y) = H(+\infty, y),
+\]
+qui sont toutes deux des fonctions de répartition unidimensionnelles.
+
+\begin{definition}[Continuité à droite]\label{def:cont_droite}
+Soit \( F : \overline{\mathbb{R}} \to [0,1] \) une fonction de répartition.  
+On dit que \( F \) est \textbf{continue à droite} en un point \( x \in \mathbb{R} \) si, pour toute suite \( (x_n)_{n \in \mathbb{N}} \) décroissante telle que \( \lim_{n \to \infty} x_n = x \), on a :
+\[
+\lim_{n \to \infty} F(x_n) = F(x).
+\]
+\end{definition}
+Par définition de la continuité, une fonction continue est continue à droite et à gauche.
+
+
+\begin{definition}[Quasi-inverse]\label{def:quasi}
+Soit \( F : \overline{\mathbb{R}} \to [0,1] \) une fonction de répartition continue à droite. La \textbf{quasi-inverse} de \( F \), notée \( F^{(-1)} \), est définie pour tout \( t \in [0,1] \) par :
+\[
+F^{(-1)}(t) := \inf\{ x \in \mathbb{R} \mid F(x) \geq t \}.
+\]
+De plus, si \( F \) est continue, alors on a aussi :
+\[
+F^{(-1)}(t) = \sup\{x \in \mathbb{R} \mid F(x) \leq t\}.
+\]
+\end{definition}
+
+
+\begin{theoreme}\label{thm:quasi}
+Soit \( F : \overline{\mathbb{R}} \to [0,1] \) une fonction de répartition.
+
+\begin{enumerate}
+    \item Si \( F \) est continue à droite et \( y \in [0,1] \) tel que \( F^{(-1)}(y) \in \mathbb{R} \), alors :
+    \[
+    F(F^{(-1)}(y)) \geq y.
+    \]
+
+    \item Si \( F \) est continue à droite, alors pour tout \( x \in \mathbb{R} \) et tout \( y \in \mathbb{R} \) tel que \( F^{(-1)}(y) \in \mathbb{R} \), on a :
+    \[
+    F(x) \geq y \quad \Leftrightarrow \quad F^{-1}(y) \leq x.
+    \]
+
+    \item Si \( F \) est continue, alors pour tout \( y \in [0,1] \) tel que \( F^{(-1)}(y) \in \mathbb{R} \), on a :
+    \[
+    F(F^{(-1)}(y)) = y.
+    \]
+\end{enumerate}
+\end{theoreme}
+
+\begin{proof}
+\textbf{(1)} Supposons que \( F^{(-1)}(y) \in \mathbb{R} \). Considérons l'ensemble \( A = \{ x \in \mathbb{R} \mid F(x) \geq y \} \). Par hypothèse, cet ensemble est non vide.  
+Soit \( (x_n)_{n \in \mathbb{N}} \subseteq A \) une suite décroissante telle que \( \lim_{n \to \infty} x_n = \inf A = F^{(-1)}(y) \).  
+Comme \( F \) est croissante, la suite \( (F(x_n))_{n \in \mathbb{N}} \) est également décroissante.  
+Par continuité à droite de \( F \), on a :
+\[
+\lim_{n \to \infty} F(x_n) = F(F^{(-1)}(y)).
+\]
+Or, chaque \( F(x_n) \geq y \), donc par passage à la limite :
+\[
+F(F^{(-1)}(y)) \geq y.
+\]
+
+\vspace{1em}
+\textbf{(2)} 
+\begin{itemize}
+\item[\( \Rightarrow \)] Supposons \( F(x) \geq y \).  
+Par définition, \( F^{(-1)}(y) = \inf\{ z \in \mathbb{R} \mid F(z) \geq y \} \).  
+Puisque \( x \in \{ z \mid F(z) \geq y \} \), alors \( F^{(-1)}(y) \leq x \).
+
+\item[\( \Leftarrow \)] Supposons \( F^{(-1)}(y) \leq x \).  
+Comme \( F \) est croissante, on a \( F(F^{(-1)}(y)) \leq F(x) \).  
+D'après le point (1), \( F(F^{(-1)}(y)) \geq y \).  
+Donc, \( F(x) \geq y \).
+\end{itemize}
+
+\vspace{1em}
+\textbf{(3)} On sait déjà que \( F(F^{(-1)}(y)) \geq y \) par le point (1).  
+Si \( F \) est continue (et donc aussi continue à gauche), on peut utiliser une démonstration similaire à (1) avec une suite croissante \( (x_n)_{n \in \mathbb{N}}\) qui converge vers \( F^{(-1)}(y) \), pour obtenir :
+\[
+F(F^{(-1)}(y)) \leq y.
+\]
+Ainsi, on a l'égalité :
+\[
+F(F^{(-1)}(y)) = y.
+\]
+\end{proof}
+
+\section{Définition des Copules}
+
+Le but de cette section est de formaliser le concept de copule dans un cadre mathématique général.
+
+\subsection{Definitions de sous copule et copule}
+\begin{definition}[Sous-copule bidimensionnelle]\label{def:sub_copule}
+Une \textit{sous-copule bidimensionnelle} (ou \textit{2-sous-copule}, ou simplement \textit{sous-copule}, par abus de langage) est une fonction \( C' \) satisfaisant les propriétés suivantes :
+\begin{enumerate}
+    \item Le domaine de \( C' \) est donné par :
+\[
+\text{Dom}(C') = S_1 \times S_2,
+\]
+où \( S_1, S_2 \subset I = [0,1] \), tels que \( \{0\}, \{1\} \subset S_1 \) et \( \{0\}, \{1\} \subset S_2 \).  .  
+De plus, pour tout \( (u,v) \in \text{Dom}(C') \), on a :
+\[
+0 \leq C'(u,v) \leq 1.
+\]
+
+    
+    \item \textbf{2-monotone};
+
+    \item La fonction \( C' \) est \textbf{ancrée} et admet les \textbf{fonctions marginales} suivantes : pour tout \( u \in S_1 \) et tout \( v \in S_2 \), on a :
+    \[
+    F(u):= C'(u,1) = u \quad \text{et} \quad G(v):= C'(1,v) = v.
+    \]
+\end{enumerate}
+\end{definition}
+
+\begin{definition}[Copule bidimensionnelle]\label{def:copule}
+Une \textit{copule bidimensionnelle} (ou \textit{2-copule}, ou simplement \textit{copule}, par abus de langage) est une fonction 
+\[
+C : I^2 \to I,
+\]
+où \( I = [0,1] \), qui vérifie les propriétés suivantes :
+
+\begin{enumerate}
+    \item \textbf{2-monotone};
+    
+    \item La fonction C est \textbf{ancrée} et admet les \textbf{fonctions marginales} suivantes:
+    \[
+    \quad F(u):= C(u,1) = u,  \quad G(v):=C(1,v) = v, \quad \forall u,v \in I.
+    \]
+\end{enumerate}
+\end{definition}
+
+Comme pour des fonctions de répartitions on a la relation suivante :
+\[
+C(u,v) = V_C([0,u] \times [0,v]).
+\]
+Cela signifie que la copule \( C(u,v) \) peut être interprétée comme la mesure (de probabilité quand on parlera des variables aléatoires) assignée au rectangle \( [0,u] \times [0,v] \) dans le carré unité \( I^2\).
+
+
+\section{Propriétés élémentaires}
+
+\begin{theoreme}\label{thm:sub_copula_fretchet}
+Soit \( C' \) une sous-copule. Alors, pour tout \( (u,v) \in \mathrm{Dom}\, C' \),
+\[
+\max(u+v-1,\, 0) \leq C'(u,v) \leq \min(u,v).
+\]
+\end{theoreme}
+
+\begin{proof}
+En utilisant la 2-monotonie de \( C' \) sur les rectangles \( [0,u] \times [v,1] \) et \( [u,1] \times [0,v] \), on obtient :
+\[
+C'(u,v) \leq C'(u,1) = u \quad \text{et} \quad C'(u,v) \leq C'(1,v) = v,
+\]
+d'où \( C'(u,v) \leq \min(u,v) \).
+
+Par ailleurs, en appliquant la 2-monotonie sur le rectangle \( [u,1] \times [v,1] \), on a :
+\[
+C'(u,v) \geq u + v - 1.
+\]
+Puisque \( C'(u,v) \geq 0 \), on conclut :
+\[
+C'(u,v) \geq \max(u+v-1,\, 0).
+\]
+\end{proof}
+
+Par la définition~\ref{def:sub_copule}, toute sous-copule est en particulier une copule. Alors ce résultat s’applique également aux copules.
+Lorsqu’on les considère dans le cadre des copules, ces bornes sont connues sous les noms suivants :
+
+\[
+W(u,v) := \max(u+v-1, 0) \quad \text{(borne inférieure Fréchet–Hoeffding)},
+\]
+\[
+M(u,v) := \min(u,v) \quad \text{(borne superieure Fréchet–Hoeffding)}.
+\]
+
+\begin{lemme}
+Pour tout $(u,v) \in I^2$ les fonctions suivantes sont des copules :
+\[
+M(u,v) := \min(u,v),
+\quad
+W(u,v) := \max(u+v-1,0),
+\quad
+\Pi(u,v) := uv, \text{ (Copule produit)}.
+\]
+\end{lemme}
+
+\begin{proof}
+On vérifie d’abord que les fonctions considérées satisfont la première condition de la définition~\ref{def:copule}, à savoir les conditions d’ancrage et les marginales. Leur 2-monotonie étant établie (voir lemme~\ref{lem:premier}), il s’ensuit qu’il s’agit bien de copules.
+\end{proof}
+
+
+\begin{lemme}\label{lemme:non_dec_cop}
+Soit \( C \) une copule. Pour tout \( u_1 \leq u_2 \), la fonction \( t \mapsto |C(u_2,t) - C(u_1,t)| \) est non décroissante sur \([0,1]\).
+\end{lemme}
+
+\begin{proof}
+Posons:
+\[
+f(t) := C(u_2,t) - C(u_1,t).
+\]
+Pour \( t_1 \leq t_2 \), la 2-monotonie sur \([u_1,u_2] \times [t_1,t_2]\) donne :
+\[
+C(u_2,t_2) - C(u_2,t_1) - C(u_1,t_2) + C(u_1,t_1) \geq 0,
+\]
+\[
+C(u_2,t_2)  - C(u_1,t_2) \geq C(u_2,t_1) - C(u_1,t_1)
+\]
+
+Par 2-monotonie sur le rectangle \([u_1, u_2] \times [0, t]\), on a :
+\[
+C(u_2, t) - C(u_1, t) \geq 0.
+\]
+
+Donc, \( f(t_2) \geq f(t_1) \). Alors \( f \) est non décroissante.
+\end{proof}
+
+
+
+\begin{theoreme}\label{thm:lip_cont}
+Les fonctions copules sont \textbf{Lipschitz continues}, c’est-à-dire qu’elles vérifient l’inégalité suivante :  
+\[
+\forall\, (u_1, v_1), (u_2, v_2) \in [0,1]^2 \text{ avec } u_1 < u_2,\, v_1 < v_2,
+\]
+\[
+|C(u_2, v_2) - C(u_1, v_1)| \leq |u_2 - u_1| + |v_2 - v_1|.
+\]
+\end{theoreme}
+
+\begin{proof}
+Par l'inégalité triangulaire, nous avons :  
+\[
+|C(u_2, v_2) - C(u_1, v_1)| \leq |C(u_2, v_2) - C(u_1, v_2)| + |C(u_1, v_2) - C(u_1, v_1)|.
+\]
+
+D'autre part, on sait par le lemme 1.5 que :  
+\[
+|C(u_2, v_2) - C(u_1, v_2)| \leq |u_2 - u_1| \quad \text{et} \quad |C(u_1, v_2) - C(u_1, v_1)| \leq |v_2 - v_1|.
+\]
+
+En combinant ces inégalités, on obtient :  
+\[
+|C(u_2, v_2) - C(u_1, v_1)| \leq |u_2 - u_1| + |v_2 - v_1|.
+\]
+
+Ainsi, la fonction \(C\) est Lipschitzienne.     
+\end{proof}
+
+\section{Lien avec les variables aléatoires}
+
+Dans cette section, nous rappelons brièvement certains concepts issus du cours LMAT1371 — Théorie des probabilités. Pour une présentation rigoureuse et détaillée, le lecteur pourra consulter les sources~\cite{barigou} ou~\cite{prp}*{Chapitre~2}.
+
+
+\textbf{Notions des variables aléatoires:}
+
+
+Une variable aléatoire est une formalisation mathématique d’une grandeur ou d’un objet qui dépend d’événements aléatoires.  
+Contrairement à ce que son nom peut suggérer, le terme « variable aléatoire » ne fait pas directement référence au hasard ou à la variabilité, mais désigne une fonction mathématique, définie comme suit :
+
+\begin{enumerate}
+    \item Le \textbf{domaine de définition} est l’ensemble des issues possibles d’une expérience aléatoire (par exemple : \(\Omega=\{H, T\}\), représentant les deux faces d’une pièce).
+    \item \textbf{L’image} est un espace dans lequel on observe cette expérience, appelé espace d’état (par exemple : si l’on associe \(H \mapsto -1\) et \(T \mapsto 1\)).
+\end{enumerate}
+
+Lorsque l’espace d’état est \(\overline{\mathbb{R}}\), on dit que la variable aléatoire est numérique. Lorsque l’espace d’état est \({\mathbb{R}}\), on dit que la variable aléatoire est réelle.
+
+\begin{definition}[Fonction de répartition d'une variable aléatoire]\label{def:fonc_va}
+Soit \(X\) une variable aléatoire numérique. La fonction de répartition \(F\) associée à \(X\) est définie pour tout \(x \in \overline{\mathbb{R}}\) par :
+\[
+F(x) = \mathbb{P}(X \leq x).
+\]
+\end{definition}
+
+\begin{theoreme}\label{thm:fonc_va}
+Une fonction \(F : \overline{\mathbb{R}} \to [0,1]\) est la fonction de répartition d’une variable aléatoire numérique si et seulement si :
+\begin{itemize}
+    \item \(F\) est une fonction de répartition (au sens de la définition~\ref{def:fonc_rep_uni}),
+    \item \(F\) est continue à droite,
+\end{itemize}
+\end{theoreme}
+
+\begin{proof}
+La preuve de ce théorème se trouve dans la source \cite{barigou}*{théorème~2.3.8}
+\end{proof}
+
+\begin{definition}
+Une variable aléatoire numérique \( X \) est dite \textbf{continue} si sa fonction de répartition est continue.
+\end{definition}.
+
+\begin{definition}
+Une application \( (X, Y) : \Omega \to \overline{\mathbb{R}}^2 \) est un \textbf{vecteur aléatoire numérique} si \(X\) et \(Y\) sont des variables aléatoires numériques.
+\end{definition}
+
+\begin{definition}\label{def:fonct_va_jointe}
+Soit \((X, Y)\) vecteur aléatoire numérique. La \textbf{fonction de répartition jointe} associée à X est définie \(\forall(x,y) \in \overline{\mathbb{R}}^2\) par:
+\[
+H(x, y) = \mathbb{P}(X \leq x,\, Y \leq y).
+\]
+avec des fonctions de répartition marginales définies comme:
+\[
+F(x) := \mathbb{P}(X \leq x), \quad \text{et} \quad
+G(y) := \mathbb{P}(Y \leq y), 
+\]
+\end{definition}
+
+
+
+
+Grâce à cette formalisation des variables aléatoires, on peut énoncer le théorème suivant :
+\begin{theoreme}[Caractérisation probabiliste d'une copule]\label{def:cop_va}
+Soit \( (U, V) \) un vecteur aléatoire dont les composantes sont uniformément distribuées sur l’intervalle \([0,1]\). La fonction définie par
+\[
+C(u,v) := \mathbb{P}(U \leq u,\; V \leq v), \quad (u,v) \in [0,1]^2,
+\]
+est une \emph{copule}.
+\end{theoreme}
+
+\begin{proof}
+Il suffit de vérifier que la fonction \(C\) satisfait les propriétés de la définition~\ref{def:copule}. Donc, elle satisfait:  
+(i) elle est définie sur \([0,1]^2\) et prend ses valeurs dans \([0,1]\),  
+(ii) ses marges sont uniformes,  
+(iii) elle est 2-monotone et ancrée. 
+Ces propriétés découlent directement des axiomes de la théorie des probabilités et de la distribution uniforme des variables \(U\) et \(V\).
+\end{proof}
+
+Dans les chapitres suivants, ce théorème servira de définition des copules dans un cadre probabiliste.
+
+\chapter{Résultats fondamentaux et bornes de Fréchet-Hoeffding}
+
+Nous introduisons à présent certains résultats fondamentaux sur les copules dans un cadre probabiliste, en nous appuyant notamment sur le Théorème~\ref{def:cop_va}. Bien que ces résultats soient également valables dans un cadre purement analytique, nous choisissons de les démontrer dans le contexte aléatoire, où les arguments sont souvent plus naturels et les applications plus immédiates.
+
+\section{Transformée Intégrale de probabilité}
+\begin{lemme}\label{lemme:echantillon}
+Soit \( F \) une fonction de répartition et \( F^{(-1)} \) sa quasi-inverse. 
+Si une variable aléatoire numérique \(U\) est uniforme, alors
+\[
+\mathbb{P}(F^{(-1)}(U) \leq x) = F(x) \quad \text{pour } x \in [0,1].
+\]
+\end{lemme}
+
+\begin{proof}
+Soit \( x \in \mathbb{R} \) et \( u \in (0,1) \).  
+Étant donné que \( F \) est une fonction de répartition et donc est une fonction continue à droite par définition,  
+par le théorème~\ref{thm:quasi}, on a que :
+\[
+F(x) \geq u \quad \Longleftrightarrow \quad F^{-1}(u) \leq x.
+\]
+Donc,
+\[
+\mathbb{P}(F^{(-1)}(U) \leq x) = \mathbb{P}(U \leq F(x)) = F \circ F(x) = F(x).
+\]
+\end{proof}
+
+Le résultat suivant constitue une étape clé vers le théorème de Sklar, que nous présenterons ensuite.
+\begin{theoreme}[Transformée Intégrale de Probabilité]\label{thm:PIT}
+Soit \( X \) une variable aléatoire numérique continue et F sa fonction de répartition. Alors, la variable aléatoire \( Y := F(X)\) est une variable aléatoire uniforme.
+\end{theoreme}
+
+\begin{proof}
+Soit \( u \in [0,1] \). Par le théorème~\ref{thm:quasi} on a:
+\begin{align*}
+\mathbb{P}(F(X) \leq u) 
+&= \mathbb{P}(F^{(-1)} \circ F(X) \leq F^{(-1)}(u)) \\
+&= \mathbb{P}(X \leq F^{(-1)}(u)) \\
+&= F \circ F^{(-1)}(u) = u.
+\end{align*}
+\end{proof}
+
+Soit \( X \) et \( Y \) deux variables aléatoires réelles continues avec fonctions de répartition F et G, respectivement. Par le théorème~\ref{thm:PIT}, les variables \( U := F(X) \) et \( V := G(Y) \) sont uniformément distribuées sur \( [0,1] \). De plus, par le lemme~\ref{lemme:echantillon} on a l'identité:
+\[
+(F^{(-1)}(U),\, G^{(-1)}(V)) = (X, Y).
+\]
+
+Ce fait prépare l’énoncé du théorème fondamental des copules, qui établit le lien structurel entre la fonction de répartition jointe \( H \) de \( (X,Y) \) et ses marginales \( F \), \( G \).
+
+\section{Théorème de Sklar et ses consequences}
+\begin{theoreme}[Théorème de Sklar]\label{thm:sklar}
+Soit \( (X, Y) \) un couple de variables aléatoires réelles, admettant une fonction de répartition jointe \( H \), et des fonctions de répartition marginales respectives \( F \) et \( G \). Alors, il existe une copule \( C : [0,1]^2 \to [0,1] \) telle que, pour tout \( (x,y) \in \overline{\mathbb{R}}^2 \),
+\[
+H(x, y) = C(F(x), G(y)).
+\]
+De plus, si \( F \) et \( G \) sont \textbf{continues}, cette copule \( C \) est unique.
+
+Réciproquement, si \( C \) est une copule et \( F, G \) des fonctions de répartition univariées, alors la fonction \( H \) définie par
+\[
+H(x, y) := C(F(x), G(y))
+\]
+est une fonction de répartition jointe ayant \( F \) et \( G \) pour marginales.
+\end{theoreme}
+
+\begin{proof}
+On suppose \( F \) et \( G \) continues.
+
+Définissons \( U := F(X) \), \( V := G(Y) \).
+
+Posons
+\[
+C(u,v) := P(U \leq u, V \leq v) = P(F(X) \leq u, G(Y) \leq v).
+\]
+Alors, pour tout \( (x,y) \in \overline{\mathbb{R}}^2 \),
+\[
+H(x, y) = \mathbb{P}(X \leq x,\; Y \leq y) 
+= \mathbb{P}(F(X) \leq F(x),\; G(Y) \leq G(y)) 
+= C(F(x), G(y)). \tag{*}
+\]
+
+Cela montre l'existence de \( C \) satisfaisant l'identité annoncée. La continuité des marginales assure l’unicité.
+
+Réciproquement, si \( C \) est une copule et \( F, G \) des fonctions de répartition, on prouve que $\forall (x,y) \in \overline{\mathbb{R}}^2$
+\[
+H(x,y) := C(F(x), G(y))
+\]
+est une fonction de répartition jointe d'un vecteur aléatoire $(X,Y)$ en utilisant la démarche inverse de (*).
+De plus, on a que $\forall (x,y) \in \overline{\mathbb{R}}^2$:
+\[
+H(\infty,y) = C(1, G(y)) = G(y), \quad H(x,\infty) = C(F(x), 1) = F(x).
+\]
+
+Pour une démonstration complète dans le cas général (fonctions de répartition discontinues), voir Nelsen (2006) :  \cite{nelsen}
+\end{proof}
+\begin{definition}[Copule de dépendance]\label{def:cop_dep}
+Soit \( (X, Y) \) un vecteur aléatoire, de fonctions de répartition marginales \( F \) et \( G \), et de fonction de répartition jointe \( H \). 
+
+Dans le cadre du théorème de Sklar, la fonction \( C \) telle que
+\[
+H(x, y) = C(F(x), G(y)), \quad \forall x, y \in \overline{\mathbb{R}},
+\]
+est appelée la \textbf{copule de dépendance} de \( X \) et \( Y \), et sera notée \( C_{XY} \) lorsque la dépendance explicite aux lois marginales doit être soulignée.
+
+Si \( F \) et \( G \) sont \textbf{continues}, alors cette copule admet la représentation explicite :
+\[
+C_{XY}(u, v) := \mathbb{P}\left(X \leq F^{(-1)}(u),\; Y \leq G^{(-1)}(v)\right), \quad (u,v) \in [0,1]^2.
+\]
+\end{definition}
+
+
+Ainsi, théorème de Sklar peut être vu comme une \emph{reparamétrisation naturelle} de la fonction de répartition jointe \( H \) par ses marginales \( F \) et \( G \), permettant d’extraire une fonction \( C \) définie sur \( [0,1]^2 \) qui capture \emph{purement la dépendance}.
+Donc, \( C_{XY} \) encode entièrement la structure de dépendance entre \( X \) et \( Y \), indépendamment des distributions marginales.
+
+\begin{corollaire}\label{cor:sklar}
+Soient \( X \) et \( Y \) deux variables aléatoires continues, de fonctions de répartition marginales \( F \) et \( G \), et de fonction de répartition jointe \( H \). Alors, pour tous \( x, y \in \overline{\mathbb{R}} \), on a :
+\begin{enumerate}
+    \item \( X \) et \( Y \) sont indépendantes si et seulement si la copule associée est la copule produit : 
+    \[
+    C_{XY}(u,v) = uv = \Pi(u,v).
+    \]
+    
+    \item La fonction de répartition jointe \( H \) vérifie les inégalités de Fréchet-Hoeffding :
+    \[
+    \max\big(F(x) + G(y) - 1,\; 0\big) \leq H(x,y) \leq \min\big(F(x), G(y)\big).
+    \]
+\end{enumerate}
+\end{corollaire}
+
+\begin{proof}
+(1)
+Sa démonstration découle du théorème de Sklar et de l'observation selon laquelle \(X\) et \(Y\) sont indépendantes si et seulement si \(H(x,y) = F(x)G(y)\) pour tout \(x, y \in \overline{\mathbb{R}}\).
+(2)
+Par le théorème~\ref{thm:sklar} et le théorème~\ref{thm:PIT}.
+\end{proof}
+
+Maintenant que nous avons établi quelques conséquences du théorème de Sklar, présentons un autre résultat fondamental : l’invariance des copules sous des transformations strictement croissantes. Cette propriété jouera un rôle essentiel dans la suite.
+
+Avant cela, établissons un lemme technique qui sera utile pour démontrer cet théorème.
+
+\begin{lemme}\label{lemme:FSC}
+Soit \(\alpha : \mathbb{R} \to \mathbb{R}\) une fonction strictement croissante et \(x \in \mathbb{R}\). Alors,
+\[
+\alpha^{(-1)}(\alpha(x)) = x,
+\]
+
+\end{lemme}
+
+\begin{proof}
+\textbf{(i) \(\alpha^{(-1)}(\alpha(x)) \leq x\)} \\
+
+Posons l'ensemble \( A := \{ t \in \mathbb{R} \mid \alpha(t) \geq \alpha(x) \} \). Par définition, \( x \in A \) car \( \alpha(x) \geq \alpha(x) \). Ainsi,
+\[
+\alpha^{(-1)}(\alpha(x)) = \inf A \leq x.
+\]
+
+\textbf{(ii) \(\alpha^{(-1)}(\alpha(x)) \geq x\)} \\
+Puisque \(\alpha\) est strictement croissante, pour tout \(y < x\), on a \(\alpha(y) < \alpha(x)\). Par contraposée, si \(\alpha(y) \geq \alpha(x)\), alors \(y \geq x\). Ainsi,
+\[
+\{y \in \mathbb{R} \mid \alpha(y) \geq \alpha(x)\} \subseteq \{y \in \mathbb{R} \mid y \geq x\}.
+\]
+En prenant l'infimum des deux ensembles, on obtient :
+\[
+\alpha^{(-1)}(\alpha(x)) = \inf\{y \mid \alpha(y) \geq \alpha(x)\} \geq \inf\{y \mid y \geq x\} = x.
+\]
+
+En combinant les deux inégalités, on conclut :
+\[
+\alpha^{(-1)}(\alpha(x)) = x.
+\]
+\end{proof}
+
+
+\begin{theoreme}[Invariance sous transformations strictement croissantes]\label{thm:ISTSC}
+
+
+Soient \( X \) et \( Y \) deux variables aléatoires réelles \textbf{continues} ayant pour copule \( C_{XY} \).  
+Si \( \alpha : \mathbb{R} \to \mathbb{R} \) et \( \beta : \mathbb{R} \to \mathbb{R} \) sont des fonctions strictement croissantes définies respectivement sur \( \operatorname{Im}(X) \) et \( \operatorname{Im}(Y) \), alors :
+\[
+C_{\alpha(X), \beta(Y)} = C_{XY}.
+\]
+Autrement dit, la copule est invariante par transformation strictement croissante des fonctions marginales.
+\end{theoreme}
+
+\begin{proof}
+Soient \( F_X \), \( F_{\alpha(X)} \), \( G_Y \), et \( G_{\beta(Y)} \) les fonctions de répartition de \( X \), \( \alpha(X) \), \( Y \), et \( \beta(Y) \), respectivement.
+
+Comme \( \alpha \) est strictement croissante, alors par le théorème~\ref{lemme:FSC}, et puisque \( \operatorname{Im}(X) = \mathbb{R} \) et \( \alpha : \mathbb{R} \to \mathbb{R} \), on a, pour tout \( x \in \mathbb{R} \) :
+\[
+F_{\alpha(X)}(x) = \mathbb{P}(\alpha(X) \leq x) = \mathbb{P}\big( X \leq \alpha^{(-1)}(x) \big) = F_X\big( \alpha^{(-1)}(x) \big).
+\]
+
+De même, pour tout \( y \in \mathbb{R} \),
+\[
+G_{\beta(Y)}(y) = G_Y\big( \beta^{(-1)}(y) \big).
+\]
+
+On a alors :
+\[
+\begin{aligned}
+C_{\alpha(X), \beta(Y)}(u,v) 
+&= \mathbb{P}\left( F_{\alpha(X)}(\alpha(X)) \leq u,\; G_{\beta(Y)}(\beta(Y)) \leq v \right) \\
+&= \mathbb{P}\left( F_X(X) \leq u,\; G_Y(Y) \leq v \right) \\
+&= C_{XY}(u,v).
+\end{aligned}
+\]
+\end{proof}
+
+
+\textbf{Bornes de Fréchet-Hoeffding}
+
+
+Ce qui nous intéresse dans ces deux prochaines sections est la question suivante : \\
+\textit{Que peut-on dire des variables aléatoires \(X\) et \(Y\) lorsque leur fonction de répartition jointe \(H\) est égale à l’une de ses bornes de Fréchet-Hoeffding ?}
+
+Dans la suite, nous introduisons quelques résultats enchaînés qui vont nous permettre de répondre à cette question.
+
+\section{Comonotonie}
+
+\begin{definition}\label{def:ND_set}
+Soit \(S \subset \mathbb{R}^2\). \(S\) est \emph{non-décroissant} si, pour tout \((u,v), (x,y) \in S\), on a \(x  < u\) implique \( y \leq v\).
+\end{definition}
+
+\begin{lemme}\label{lem:ND_Set1}
+Soit $S$ un sous-ensemble de $\mathbb{R}^2$. Alors $S$ est non-décroissant si et seulement si pour chaque $(x, y) \in \mathbb{R}^2$, l’une des deux conditions suivantes est vérifiée :
+\begin{itemize}
+    \item[\((\ast_1)\)] Pour tous $(u, v) \in S$, $u \leq x$ implique $v \leq y$ ; ou
+    \item[\((\ast_2)\)] Pour tous $(u, v) \in S$, $v \leq y$ implique $u \leq x$.
+\end{itemize}
+\end{lemme}
+
+\begin{proof}
+\medskip
+
+\textbf{(\(\Rightarrow\))} On prouve ceci par absurde. On veut arriver à la conclusion que l'affirmation "S est non décroissant alors \(\exists (x,y) \in \mathbb{R}^2\) tel que ni \((\ast_1)\) ni \((\ast_2)\) soient vérifiées" est impossible.  
+Supposons par absurde que \( S \) est non-décroissant, et que ni \((\ast_1)\) ni \((\ast_2)\) soient vérifiées.  
+Alors il existe des points \( (a, b) \) et \( (c, d) \) dans \( S \) tels que \( a \leq x \), \( b > y \), \( d \leq y \), et \( c > x \).  
+Ainsi, \( a < c \) et \( b > d \), ce qui est une contradiction par définition d'ensemble non décroissant.
+\medskip
+
+\textbf{(\(\Leftarrow\))}  Prouvons ceci par la contraposée. On veut montrer que "S n'est pas non décroissant alors \(\exists (x,y) \in \mathbb{R}^2\) tel que ni \((\ast_1)\) ni \((\ast_2)\) sont vérifiées".  
+Supposons que \( S \) ne soit pas non-décroissant. Alors il existe des points \( (a, b) \) et \( (c, d) \) dans \( S \) avec \( a < c \) et \( b > d \).  
+Soit \( (x, y) = \left( \frac{a + c}{2}, \frac{b + d}{2} \right) \) et posons \( (u_1, v_1) = (a, b) \) et \( (u_2, v_2) = (c, d) \).  
+Alors, \( (u_1, v_1) \) n’est pas vérifié pour \((\ast_1)\) et \( (u_2, v_2) \) n’est pas vérifié pour \((\ast_2)\).
+\end{proof}
+
+\begin{lemme}\label{lem:ND_set2}
+Soient $X$, $Y$ deux variables aléatoires avec fonction de répartition jointe $H$. Alors $H(x,y) = \min(F(x), G(y))$ pour tout $(x,y) \in \overline{\mathbb{R}}^2$ si et seulement si $\mathbb{P}(X \leq x, Y > y) = 0$ ou $\mathbb{P}(X > x, Y \leq y) = 0$.
+\end{lemme}
+
+\begin{proof}
+\textbf{(\(\Rightarrow\))} Supposons que $H(x,y) = \min(F(x), G(y))$ pour tout $(x,y) \in \overline{\mathbb{R}}^2$. Si $F(x) \geq G(y)$, alors $H(x,y) = G(y)$. Mais comme $F(x) = \mathbb{P}(X \leq x, Y \leq y)+ \mathbb{P}(X \leq x, Y > y)$ et $G(y) = \mathbb{P}(X \leq x, Y \leq y)+ \mathbb{P}(X > x, Y \leq y)$ , il ensuit que $\mathbb{P}(X \leq x, Y > y) = F(x) - G(y)$ et $\mathbb{P}(X > x, Y \leq y) = 0$ . De même, si $G(y) \geq F(x)$, alors $H(x,y) = F(x)$, ce qui implique que $\mathbb{P}(X > x, Y \leq y) = G(y) - F(x)$ et $\mathbb{P}(X \leq x, Y > y) = 0$.
+
+\textbf{(\(\Leftarrow\))} Supposons maintenant que pour tout $(x,y) \in \overline{\mathbb{R}^2}$, on ait $\mathbb{P}(X \leq x, Y > y) = 0$ ou $\mathbb{P}(X > x, Y \leq y) = 0$. Dans le premier cas, on a $H(x,y)=F(x) \leq G(y)$ car $\mathbb{P}(X > x, Y \leq y)\geq 0$ . Dans le second cas, $H(x,y)=G(y) \leq F(x)$ car $\mathbb{P}(X \leq x, Y > y)\geq 0$. On conclut que $H = \min(F, G)$.
+\end{proof}
+
+\begin{theoreme}\label{thm:ND_Set}
+Soient $X$ et $Y$ deux variables aléatoires réelles avec fonction de répartition jointe $H$. Alors $H(x,y) = M(F(x), G(y))$ si et seulement si le support de $H$ est un sous-ensemble non-décroissant de $\mathbb{R}^2$.
+\end{theoreme}
+
+\begin{proof}
+\textbf{(\(\Leftarrow\))}  
+Soit $S$ un ensemble non-décroissant et soit $(x,y) \in \mathbb{R}^2$.  
+On peut réécrire $(\ast_1)$ comme  
+\[
+\{(a,b) \mid a \leq x \text{ et } b > y\} \cap S = \emptyset
+\]  
+et $(\ast_2)$ comme  
+\[
+\{(a,b) \mid a > x \text{ et } b \leq y\} \cap S = \emptyset.
+\]  
+Puisque $S$ est le support de $H$, on peut les écrire comme  
+\[
+\mathbb{P}(X > x, Y \leq y) = 0 \quad \text{et} \quad \mathbb{P}(X \leq x, Y > y) = 0.
+\]  
+Par le lemme~\ref{lem:ND_set2}, ceci est équivalent à dire que  
+\[
+\forall (x,y) \in \mathbb{R}^2, \quad H(x,y) = M(F(x), G(y)).
+\]  
+
+La preuve dans l'autre sens suit l'argument inverse à cela, car ce sont des équivalences.
+\end{proof}
+
+
+\begin{exemple}\label{ex:ND_Set}
+Considérons le vecteur aléatoire numérique continu \( (X, X) \) avec fonction de répartition \( H \). Soient \( (x,x), (x',x') \in \operatorname{supp}(H) \) avec \( x \neq x' \).
+
+Supposons que \( x < x' \), alors \( x \leq x' \), donc \( (x, x) \leq (x', x') \).\\
+Supposons maintenant que \( x > x' \), alors \( x \geq x' \), et on a également \( (x, x) \geq (x', x') \).
+
+Ainsi, \( \operatorname{supp}(H) \) est un ensemble non-décroissant.
+
+Par le théorème~\ref{thm:ND_Set} et par le théorème~\ref{thm:sklar}, on en déduit que la copule associée à \( (X, X) \) est $M$.
+\end{exemple}
+
+\begin{remark}\label{rem:ND_Set}
+Par l'invariance des copules sous applications croissantes, tout vecteur \( (X, \phi(X)) \) où \( \phi \) est strictement croissante vérifie également cette propriété. Les variables aléatoires qui ont la copule associée M sont dites \textbf{variables aléatoires comonotones}. 
+\end{remark}
+
+\section{Contremonotonie}
+
+\begin{definition}\label{def:NI_Set}
+Soit \(S \subset \mathbb{R}^2\). \(S\) est \emph{non-croissant} si, pour tout \((u,v), (x,y) \in S\), on a \(x  < u\) implique \( y \geq v\).
+\end{definition}
+
+\begin{lemme}\label{lem:NI_Set1}
+Soit $S$ un sous-ensemble de $\mathbb{R}^2$. Alors $S$ est non-croissant si et seulement si pour chaque $(x, y) \in \mathbb{R}^2$, l’une des deux conditions suivantes est vérifiée :
+\begin{itemize}
+    \item[\((\ast_3)\)] Pour tous $(u, v) \in S$, $u \leq x$ implique $v \geq y$ ; ou
+    \item[\((\ast_4)\)] Pour tous $(u, v) \in S$, $v \leq y$ implique $u \geq x$.
+\end{itemize}
+\end{lemme}
+
+\begin{proof}
+\textbf{(\(\Rightarrow\))} Supposons par absurde que $S$ est non-croissant, et que ni \((\ast_3)\) ni \((\ast_4)\) soient vérifiées. Alors il existe des points $(a, b)$ et $(c, d)$ dans $S$ tels que $a \leq x$, $b \leq y$, $d > y$, et $c > x$. Ainsi, $a < c$ et $b < d$, ce qui est une contradiction par définition. Donc, au moins une des conditions doit être vérifiée.
+
+\medskip
+
+\textbf{(\(\Leftarrow\))} Supposons que $S$ ne soit pas non-décroissant. Alors il existe des points $(a, b)$ et $(c, d)$ dans $S$ avec $a < c$ et $b < d$. Soit $(x, y) = \left( \frac{a + c}{2}, \frac{b + d}{2} \right)$ et posons $(u_1, v_1) = (a, b)$ et $(u_2, v_2) = (c, d)$. Alors, $(u_1, v_1)$ n’est pas vérifié pour \((\ast_3)\) et $(u_2, v_2)$ n’est pas vérifié pour \((\ast_4)\).
+\end{proof}
+
+\begin{lemme}\label{lem:NI_Set2}
+Soient $X$, $Y$ deux variables aléatoires avec fonction de répartition jointe $H$. Alors $H(x,y) = W(F(x),G(y))$ pour tout $(x,y) \in \overline{\mathbb{R}}^2$ si et seulement si $\mathbb{P}(X \leq x, Y \leq y) = 0$ ou $\mathbb{P}(X > x, Y > y) = 0$.
+\end{lemme}
+
+\begin{proof}
+\textbf{(\(\Rightarrow\))} Supposons que $H(x,y) = W(F(x),G(y))$ pour tout $(x,y) \in \overline{\mathbb{R}}^2$. 
+
+Si $F(x)+G(y)-1 \leq 0$, alors $H(x,y) = \mathbb{P}(X \leq x, Y \leq y) = 0$.
+
+Si $F(x)+G(y)-1 > 0$, alors $H(x,y) = F(x)+G(y)-1$. De plus, on a que :
+\[
+\mathbb{P}(X > x, Y > y) = V_H([x, \infty] \times [y, \infty]) = 1 - F(x) - G(y) + H(x,y) = 0
+\]
+par hypothèse.
+
+\vspace{0.5em}
+\textbf{(\(\Leftarrow\))} Supposons maintenant que pour tout $(x,y) \in \overline{\mathbb{R}}^2$, on ait $\mathbb{P}(X > x, Y > y) = 0$. 
+
+Alors, $1 - F(x) - G(y) + H(x,y) = 0$, donc, $H(x,y) = F(x) + G(y) - 1$
+
+Si $\mathbb{P}(X \leq x, Y \leq y) = 0$, alors $H(x,y) = 0$.
+
+Par définition, $H$ est 2-monotone, donc :
+\[
+H(x,y) = W(F(x),G(y)).
+\]
+\end{proof}
+
+
+\begin{theoreme}\label{thm:NI_Set}
+Soient $X$ et $Y$ deux variables aléatoires avec fonction de répartition conjointe $H$ et fonctions de répartition marginales $F$ et $G$. Alors $H(x, y) = W(F(x),G(y))$ si et seulement si le support de $H$ est un sous-ensemble non-croissant de $\mathbb{R}^2$.
+\end{theoreme}
+
+\begin{proof}
+\textbf{(\(\Leftarrow\))}  
+Soit $S$ un ensemble non-croissant et soit $(x,y) \in \mathbb{R}^2$.  
+On peut réécrire $(\ast_1)$ comme  
+\[
+\{(a,b) \mid a \leq x \text{ et } b \leq y\} \cap S = \emptyset
+\]  
+et $(\ast_2)$ comme  
+\[
+\{(a,b) \mid a > x \text{ et } b > y\} \cap S = \emptyset.
+\]  
+Puisque $S$ est le support de $H$, on peut les écrire comme  
+\[
+\mathbb{P}(X \leq x, Y \leq y) = 0 \quad \text{et} \quad \mathbb{P}(X > x, Y > y) = 0.
+\]  
+Par le lemme~\ref{lem:NI_Set2}, ceci est équivalent à dire que  
+\[
+\forall (x,y) \in \overline{\mathbb{R}}^2, \quad H(x,y) = W(F(x),G(y)).
+\]  
+
+La preuve dans l'autre sens suit l'argument inverse à cela, car ce sont des équivalences.
+\end{proof}
+
+\begin{exemple}\label{ex:NI_Set}
+Considérons le vecteur aléatoire numérique continu \( (X, -X) \) avec fonction de répartition \( H \). Soient \( (x,-x), (x',-x') \in \operatorname{supp}(H) \) avec \( x \neq x' \).
+
+Supposons que \( x < x' \), alors \( -x > -x' \), donc \( (x, -x) \geq (x', -x') \).\\
+Supposons maintenant que \( x > x' \), alors \( -x < -x' \), et on a également \( (x, -x) \leq (x', -x') \).
+
+Ainsi, \( \operatorname{supp}(H) \) est un ensemble non-croissant.
+
+Par le théorème~\ref{thm:NI_Set} et par le théorème~\ref{thm:sklar}, on en déduit que la copule associée à \( (X, -X) \) est $W$.
+\end{exemple}
+
+\begin{remark}\label{rem:NI_Set1}
+Par l'invariance des copules sous applications croissantes, tout vecteur \( (X, \phi(X)) \) où \( \phi \) est strictement croissante vérifie également cette propriété. Les variables aléatoires qui ont comme copule associée W sont dites variables aléatoires \emph{contremonotones}.
+\end{remark}
+
+Nous verrons dans la partie~II que les variables aléatoires \emph{comonotones} représentent un cas extrême de dépendance positive, tandis que les variables aléatoires \emph{contremonotones} constituent un cas extrême de dépendance négative.
+
+\textbf{Ordre partiel}
+
+L’inégalité classique \( W(u,v) \leq C(u,v) \leq M(u,v),\)
+valable pour toute copule \( C \) et tout point \( (u,v) \in [0,1]^2 \), suggère la définition d’un ordre partiel naturel entre copules, fondé sur la comparaison point à point de leurs valeurs.
+
+\begin{definition}\label{def:order}
+Soient \( C_1 \) et \( C_2 \) deux copules. On dit que \( C_1 \) est \emph{inférieure ou égale à \( C_2 \) au sens de l’ordre de concordance}, et l’on note \( C_1 \preceq C_2 \), si :
+\[
+C_1(u,v) \leq C_2(u,v) \quad \text{pour tout } (u,v) \in [0,1]^2.
+\]
+\end{definition}
+
+Cet ordre sur les copules est souvent appelé ordre de concordance et sera un concept qu'on utilisera dans la suite.
+
+
+\chapter{Dépendance et concordance}
+
+\section{Structure de dépendance et ces limitations}
+L'étude de la dépendance entre variables aléatoires soulève naturellement la question suivante : peut-on la décrire de manière universelle à l'aide d'un objet mathématique unique, indépendamment des lois marginales ? Les copules apparaissent comme une réponse élégante à cette problématique.
+
+Par construction, les copules entretiennent un lien naturel avec les mesures de dépendance. En effet, les lois marginales \( F \) et \( G \) peuvent être insérées dans n’importe quelle copule, ce qui montre qu’elles ne véhiculent aucune information directe sur le couplage entre les variables. Réciproquement, une copule \( C \) peut être combinée à n’importe quelles marginales, ce qui implique qu’elle ne contient aucune information sur les distributions univariées.
+
+Dans ce cadre, il est tentant de penser que la copule d’un couple \((X,Y)\) contient \emph{toute l'information} sur leur structure de dépendance, indépendamment des marginales, et qu’il suffirait de connaître \( C \) pour tout dire de cette dépendance.
+
+Toutefois, comme l’ont montré \textsc{Marshall} et \textsc{Olkin} (1996), cette vision est incomplète. En effet, lorsque l’une au moins des lois marginales est discontinue, la représentation copulaire n’est \emph{plus unique}, ce qui remet en cause l’idée d’une correspondance biunivoque entre dépendance et copule.
+
+Ce point est formalisé dans le résultat suivant : 
+\begin{theoreme}[Théorème de Marshall]\label{thm:marshall}
+Soit $\mathcal{H}$ un ensemble de lois bivariées incluant celles à marginales de Bernoulli, et soit 
+\[
+\rho : \mathcal{H} \to (-\infty, \infty).
+\]
+Supposons que pour tout \( H \in \mathcal{H} \), si \( H = C(F, G) \), alors \( \rho(H) = \rho(C) \), autrement dit, \( \rho \) ne dépend que de la copule associée à \( H \).  
+Alors, \( \rho \) est nécessairement constante sur \( \mathcal{H} \).
+\end{theoreme}
+
+
+\begin{proof}
+Soient $F$ et $G$ deux lois de Bernoulli avec des ensembles de valeurs respectifs $\{0, r, 1\}$ et $\{0, s, 1\}$. Si $C$ est une copule pour la loi jointe $H$ et que $C(r,s) = C^*(r,s)$, alors $C^*$ est aussi une copule pour $H$. Ainsi, $\rho(C) = \rho(C^*)$ ne dépend que de la valeur $C(r,s)$. 
+
+L'idée de la démonstration est de définir $C^*$ de sorte que non seulement $C^*(r,s) = C(r,s)$, mais aussi $C^*(r^*, s^*) = r^* s^*$ pour certains $r^*, s^* \in (0,1)$. En prenant une autre paire de lois marginales de Bernoulli, il en résulterait que $\rho(C^*) = \rho(\Pi)$, où $\Pi$ est la copule indépendante. Cela impliquerait que pour toute copule $H$, on a $\rho(H) = \rho(\Pi)$, et donc $\rho$ est constante.
+
+\textbf{1.} Supposons d'abord que $rs \leq C(r,s) \leq \min(r,s)$. Posons $r^* = C(r,s)/s$, de sorte que $r \leq r^* \leq 1$. On vérifie facilement que les quantités suivantes sont toutes positives ou nulles :
+\[
+\begin{aligned}
+& p_{11} = C(r,s), \quad p_{12} = r - C(r,s), \quad p_{21} = 0, \quad p_{22} = r^* - r, \\
+& p_{31} = s - C(r,s), \quad p_{32} = C(r,s) - r^* + 1 - s.
+\end{aligned}
+\]
+
+Soient alors les rectangles $R_{ij}$ définis par :
+
+\[
+\begin{array}{ll}
+R_{11} = \{(u,v) : 0 \leq u \leq r,\ 0 \leq v \leq s\}, & 
+R_{12} = \{(u,v) : 0 \leq u \leq r,\ s \leq v \leq 1\}, \\
+R_{21} = \{(u,v) : r \leq u \leq r^*,\ 0 \leq v \leq s\}, & 
+R_{22} = \{(u,v) : r \leq u \leq r^*,\ s \leq v \leq 1\}, \\
+R_{31} = \{(u,v) : r^* \leq u \leq 1,\ 0 \leq v \leq s\}, & 
+R_{32} = \{(u,v) : r^* \leq u \leq 1,\ s \leq v \leq 1\}.
+\end{array}
+\]
+
+Définissons alors $C^*$ comme la copule qui distribue une masse $p_{ij}$ uniformément sur chaque rectangle $R_{ij}$. On a alors $C^*(r^*, s) = r^* s = \Pi(r^*, s)$. Donc $\rho(C) = \rho(\Pi)$.
+
+\textbf{2.} Supposons que $\max(0, r + s - 1) \leq C(r,s) \leq rs$, de sorte que $0 \leq r^* = \frac{C(r,s)}{s} \leq r$. Alors,
+
+\[
+\begin{array}{rlrl}
+q_{11} &= C(r,s),       &\quad q_{12} &= r^* - C(r,s), \\
+q_{21} &= 0,            &\quad q_{22} &= r - r^*,      \\
+q_{31} &= s - C(r,s),   &\quad q_{32} &= C(r,s) - r + 1 - s,
+\end{array}
+\]
+
+
+sont tous non négatifs.
+
+Soit $C^*$ la copule qui répartit la masse $q_{ij}$ uniformément sur le rectangle $R_{ij}$ redéfini en échangeant $r$ et $r^*$. Alors $C^*$ est une copule et encore une fois $C^*(r^*, s) = r^*s = \Pi(r^*, s)$.
+
+
+\end{proof}
+
+Afin d’éviter les ambiguïtés soulevées par ce théorème, nous nous restreignons désormais au cas où les variables aléatoires sont continues.
+
+Avant de détailler des mesures de dépendance (dans le chapitre suivant), nous introduisons la notion de \emph{concordance}, concept clé pour formaliser la dépendance monotone entre variables aléatoires.
+
+\section{Concordance}
+
+\begin{definition}[Concordance empirique]
+Soient $(x_i, y_i)$ et $(x_j, y_j)$ deux observations issues d’un vecteur aléatoire $(X, Y)$ de loi continue. On dit que ces deux observations sont \emph{concordantes} si le produit $(x_i - x_j)(y_i - y_j)>0$ 
+\end{definition}
+
+\begin{definition}[Discordance empirique]
+Soient $(x_i, y_i)$ et $(x_j, y_j)$ deux observations issues d’un vecteur aléatoire $(X, Y)$ de loi continue. On dit que ces deux observations sont \emph{disconcordantes} si le produit $(x_i - x_j)(y_i - y_j)<0$ 
+\end{definition}
+
+
+Maintenant, voyons ces concepts en termes populationnels.
+\begin{definition}[Fonction de concordance]\label{def:concor}
+Soient $(X_1, Y_1)$ et $(X_2, Y_2)$ deux vecteurs indépendants de variables aléatoires réelles continues ayant pour fonctions de répartition jointes respectives $H_1$ et $H_2$, avec des fonctions marginales communes $F$ (pour $X_1$ et $X_2$) et $G$ (pour $Y_1$ et $Y_2$). On définit la fonction de concordance comme:
+\[
+Q = P\left[(X_1 - X_2)(Y_1 - Y_2) > 0 \right] - P\left[(X_1 - X_2)(Y_1 - Y_2) < 0 \right].
+\]
+\end{definition}
+
+Pour le théorème~\ref{thm:concor}, on aura besoin de la définition suivante:
+
+\begin{definition}\label{def:esperance}
+Soit \( (X, Y) : \Omega \to \mathbb{R}^2 \) un vecteur aléatoire réel, et soit \( g : \mathbb{R}^2 \to \mathbb{R} \) une fonction définie sur \(\operatorname{Im}(X)\) telle que \( \mathbb{E}[|g(X,Y)|] < \infty \).  
+Si l'on note \( H \) la fonction de répartition jointe de \( (X,Y) \) et F, G les fonctions de répartition marginales de X,Y respectivement, alors l'espérance de \( g(X, Y) \) peut s'exprimer comme :
+
+\[
+\mathbb{E} \left[ g(X, Y) \right] = \iint_{\mathbb{R}^{2}} g(x, y) \, dH(x, y).
+\]
+
+Si, de plus, \( H \) est donné par un modèle de copule, c'est-à-dire :
+
+\[
+H(x, y) = C(F(x), G(y)),
+\]
+
+alors cette espérance peut se réécrire sous la forme :
+
+\[
+\mathbb{E} \left[ g(X, Y) \right] = \iint_{[0,1]^{2}} g(F^{(-1)}(u), G^{(-1)}(v)) \, dC(u, v).
+\]
+\end{definition}
+
+\begin{theoreme}\label{thm:concor}
+Soient $(X_1, Y_1)$ et $(X_2, Y_2)$ deux vecteurs indépendants de variables aléatoires réelles continues ayant pour fonctions de répartition jointes respectives $H_1$ et $H_2$, avec des fonctions marginales communes $F$ (pour $X_1$ et $X_2$) et $G$ (pour $Y_1$ et $Y_2$).  
+
+Soient $C_1$ et $C_2$ les copules associées à $(X_1, Y_1)$ et $(X_2, Y_2)$, respectivement, de sorte que :
+
+\[
+H_1(x,y) = C_1(F(x),G(y)) \quad \text{et} \quad H_2(x,y) = C_2(F(x),G(y)).
+\]
+
+Alors,
+\[
+Q = 4 \iint_{I^2} C_2(u,v) dC_1(u,v) - 1. 
+\]
+\end{theoreme}
+
+\begin{proof}
+Étant donné que les variables aléatoires considérées sont continues, la probabilité que les produits $(X_1 - X_2)(Y_1 - Y_2)$ soient strictement négatifs est égale à un moins la probabilité qu’ils soient strictement positifs. Ainsi, on a :
+\[
+Q = 2\, \mathbb{P}\left[(X_1 - X_2)(Y_1 - Y_2) > 0\right] - 1.
+\]
+Or, le terme $\mathbb{P}\left[(X_1 - X_2)(Y_1 - Y_2) > 0\right]$ se décompose comme la somme de deux probabilités : celle que $X_1 > X_2$ et $Y_1 > Y_2$, et celle que $X_1 < X_2$ et $Y_1 < Y_2$. En raison de la symétrie des lois et de l’indépendance des deux vecteurs, on a :
+\[
+\mathbb{P}[X_1 > X_2, Y_1 > Y_2] = \mathbb{P}[X_2 < X_1, Y_2 < Y_1].
+\]
+Considérons maintenant cette dernière probabilité. Elle peut être exprimée comme l’espérance, par rapport à la loi de $(X_1, Y_1)$, de la fonction indicatrice de l’événement $\{X_2 \leq X_1, Y_2 \leq Y_1\}$. En d’autres termes, par la définition~\ref{def:esperance}, on a :
+\[
+\mathbb{P}[X_2 < X_1, Y_2 < Y_1] = \iint_{\mathbb{R}^2} \mathbb{P}[X_2 \leq x, Y_2 \leq y]\, dH_1(x,y).
+\]
+Par le théorème~\ref{thm:sklar}, on peut réécrire $\mathbb{P}[X_2 \leq x, Y_2 \leq y] = C_2(F(x), G(y))$, ce qui donne :
+\[
+= \iint_{\mathbb{R}^2} C_2(F(x), G(y))\, dC_1(F(x), G(y)).
+\]
+En appliquant le théorème~\ref{thm:PIT} (i.e., le changement de variables $u = F(x)$, $v = G(y)$), cette intégrale devient :
+\[
+= \iint_{I^2} C_2(u,v)\, dC_1(u,v).
+\]
+Par un raisonnement analogue, on peut également exprimer la probabilité que $X_1 < X_2$ et $Y_1 < Y_2$ comme :
+\[
+\mathbb{P}[X_1 < X_2, Y_1 < Y_2] = \iint_{\mathbb{R}^2} \mathbb{P}[X_2 > x, Y_2 > y]\, dH_1(x,y).
+\]
+On utilise alors l’identité $1 - F(x) - G(y) + C_2(F(x), G(y))$ pour exprimer $\mathbb{P}[X_2 > x, Y_2 > y]$, ce qui donne :
+\[
+= \iint_{\mathbb{R}^2} \left[1 - F(x) - G(y) + C_2(F(x), G(y))\right]\, dC_1(F(x), G(y)).
+\]
+Encore une fois, en passant par la transformée intégrale de probabilité, on obtient :
+\[
+= \iint_{I^2} \left[1 - u - v + C_2(u,v)\right]\, dC_1(u,v).
+\]
+Mais comme $(U, V)$ sont des variables uniformes sur $[0,1]$, on a que $\mathbb{E}[U] = \mathbb{E}[V] = \frac{1}{2}$. En appliquant la linéarité de l’intégrale, il s’ensuit que :
+\[
+\mathbb{P}[X_1 < X_2, Y_1 < Y_2] = 1 - \frac{1}{2} - \frac{1}{2} + \iint_{I^2} C_2(u,v)\, dC_1(u,v) = \iint_{I^2} C_2(u,v)\, dC_1(u,v).
+\]
+Ainsi, la probabilité que $(X_1 - X_2)(Y_1 - Y_2)$ soit strictement positif est deux fois cette quantité, soit :
+\[
+2 \iint_{I^2} C_2(u,v)\, dC_1(u,v),
+\]
+et la conclusion suit directement :
+\[
+Q = 4 \iint_{I^2} C_2(u,v)\, dC_1(u,v) - 1.
+\]
+\end{proof}
+
+Puisque \(Q\) dépend exclusivement des copules \(C_1\) et \(C_2\), alors on note $Q = Q(C_1, C_2)$.
+
+
+\begin{corollaire}\label{cor:concor}
+Soient $C_1$ et $C_2$ les copules associées à $(X_1, Y_1)$ et $(X_2, Y_2)$. Alors :  
+\begin{itemize}
+    \item \( Q \) est \textbf{symétrique} dans ses arguments :  
+    \[
+    Q(C_1, C_2) = Q(C_2, C_1).
+    \]
+    \item Si \( C_1 \preceq C_1^* \) et \( C_2 \preceq C_2^* \) pour tous \( (u,v) \in I^2 \), alors  
+    \[
+    Q(C_1, C_2) \leq Q(C_1^*, C_2^*).
+    \]
+\end{itemize}
+\end{corollaire}
+
+
+\begin{proof}
+
+\textbf{Symétrie.}  
+Cette propriété découle de la définition de la fonction de concordance, ainsi que du fait que  
+\[
+(X_1 - X_2)(Y_1 - Y_2) = (X_2 - X_1)(Y_2 - Y_1),
+\]
+ce qui montre que le signe du produit reste inchangé lorsque l'on échange les indices.
+
+\vspace{1em}
+
+\textbf{Croissance.}  
+D’après le lemme~\ref{lemme:non_dec_cop}, pour tout \( v \in [0,1] \), la fonction \( u \mapsto C(u,v) \) est croissante ; de même, \( v \mapsto C(u,v) \) est croissante pour tout \( u \in [0,1] \).
+
+Cette propriété implique que si une copule \( C_1 \) est inférieure à une autre copule \( C_2 \) point par point, alors la mesure de concordance définie par une intégrale du type \( Q(C_1, C_2) \) est également croissante.
+
+\end{proof}
+
+
+\section{Évaluation de la concordance}
+On souhaite évaluer la fonction de concordance \( Q \) pour les copules fondamentales \( M \), \( W \) et \( \Pi \).  
+Puisque l'intégration se fait selon la mesure de Lebesgue, il suffit de restreindre l'intégrale au support de chaque copule, selon la définition~\ref{def:supp}.
+
+\textbf{Évaluation par rapport à \( M \)}
+
+D’après le théorème~\ref{thm:ND_Set} et l’exemple~\ref{ex:ND_Set}, la borne supérieure de Fréchet, dans le cas d’un vecteur aléatoire uniforme sur \([0,1]^2\), correspond à la situation où \( (U, V) = (U, U) \).  
+Dans ce cas, on a \( \mathbb{P}(V = U) = 1 \), ce qui implique que le support de la copule comonotone \( M \) est donné par :
+\[
+\operatorname{supp}(M) = \{(u,v) \in [0,1]^2 \mid u = v\}.
+\]
+
+
+Nous pouvons alors calculer :
+
+\[
+Q(M,M) = 4 \iint_{I^2} \min(u,v) \, dM(u,v) - 1 = 4 \int_{0}^{1} u \, du - 1 = 1, \tag{1}
+\]
+
+\[
+Q(M,\Pi) = 4 \iint_{I^2} uv \, dM(u,v) - 1 = 4 \int_{0}^{1} u^2 \, du - 1 = \frac{1}{3}, \tag{2}
+\]
+
+\[
+Q(M,W) = 4 \iint_{I^2} \max(u+v-1,0) \, dM(u,v) - 1 = 4 \int_{1/2}^{1} (2u-1) \, du - 1 = 0. \tag{3}
+\]
+
+
+\textbf{Evaluation par rapport à \(W\)}
+
+D'après le théorème~\ref{thm:NI_Set} et l'exemple~\ref{ex:NI_Set}, la borne inférieure de Fréchet correspond au cas où \( (U, V) = (U, 1 - U) \).  
+Ainsi, on a \( \mathbb{P}(V = 1 - U) = 1 \), et donc le support de la copule contremonotone \( W \) est donné par :
+\[
+\operatorname{supp}(W) = \{(u,v) \in [0,1]^2 \mid u + v = 1\}.
+\]
+
+Ainsi, nous avons
+\[
+Q(W,\Pi) = 4 \int\int_{I^2} uv \, dW(u,v) -1 = 4 \int_{0}^{1} u(1-u) \, du -1 = -1/3; \tag{4}
+\]
+\[
+Q(W,W) = 4 \int\int_{I^2} \max(u+v-1,0) \, dW(u,v) -1 = 4 \int_{0}^{1} 0 \, du -1 = -1. \tag{5}
+\]
+
+\textbf{Evaluation par rapport à \(\Pi\)}
+
+Puisque \( U \) et \( V \) sont indépendants et uniformément distribués sur \([0,1]\), leur fonction de répartition conjointe est donnée par \( H(u,v) = uv \).  
+Dans ce cas, la copule associée est la copule indépendante \( \Pi(u,v) = uv \), dont le support est tout le carré unité :
+\[
+\operatorname{supp}(\Pi) = [0,1]^2.
+\]
+
+Comme \( d\Pi(u,v) = du dv \),  on a
+\[
+Q(\Pi,uv) = 4 \int\int_{I^2} uv \, d\Pi(u,v) -1 = 4 \int_{0}^{1} \int_{0}^{1} uv \, du dv -1= 0 \tag{6}
+\]
+
+
+
+Maintenant, soit \( C \) une copule arbitraire. Comme \( Q \) est la différence de deux probabilités, nous avons \( Q(C,C) \in [-1,1] \). De plus, en conséquence du Corollaire~\ref{cor:concor} et des valeurs de \( Q \), il en résulte également que :
+
+\[
+Q(C,\Pi) \in \left[ \frac{-1}{3}, \frac{1}{3} \right], \quad Q(C,W) \in \left[ -1, 0 \right], \quad Q(C,M) \in \left[ 0,1 \right].
+\]
+
+La figure~\ref{fig:Qcopule} illustre l’évaluation de la fonction de concordance \( Q \) appliquée à une copule \( C \) par rapport à différentes copules de référence.  Ces représentations sont parfois appelées \emph{axes de concordance}.
+
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=1.2]
+    % Première flèche : Q(C,C)
+    \draw[->, thick] (0,-1.2) -- (0,1.2);
+    \foreach \y/\label in {-1/-1, 0/0, 1/+1}
+      \draw (0,\y) -- ++(0.15,0) node[right] {\label};
+    \node[above] at (0,1.2) {$Q(C,C)$};
+
+    % Deuxième flèche : Q(C,Π)
+    \draw[->, thick] (2,-1.2) -- (2,1.2);
+    \foreach \y/\label in {-1/{$-\tfrac{1}{3}$}, 0/0, 1/{$+\tfrac{1}{3}$}}
+      \draw (2,\y) -- ++(0.15,0) node[right] {\label};
+    \node[above] at (2,1.2) {$Q(C,\Pi)$};
+
+    % Troisième flèche : Q(C,M)
+    \draw[->, thick] (4,-1.2) -- (4,1.2);
+    \foreach \y/\label in {-1/0, 0/{$+\tfrac{1}{3}$}, 1/+1}
+      \draw (4,\y) -- ++(0.15,0) node[right] {\label};
+    \node[above] at (4,1.2) {$Q(C,M)$};
+
+    % Quatrième flèche : Q(C,W)
+    \draw[->, thick] (6,-1.2) -- (6,1.2);
+    \foreach \y/\label in {-1/-1, 0/{$-\tfrac{1}{3}$}, 1/0}
+      \draw (6,\y) -- ++(0.15,0) node[right] {\label};
+    \node[above] at (6,1.2) {$Q(C,W)$};
+    \end{tikzpicture}
+    \caption{}
+    \label{fig:Qcopule}
+\end{figure}
+
+
+
+\chapter{Mesures de Dépendance}
+Maintenant que nous avons étudié la notion de concordance dans le chapitre précédent, nous pouvons introduire quelques mesures de dépendance, restreintes au cadre des variables aléatoires continues, qui constituent des alternatives au coefficient de corrélation de Pearson.
+
+Nous nous concentrerons sur les deux plus répandues : le \emph{tau de Kendall} et le \emph{rho de Spearman}. Ces mesures peuvent être formulées en termes de concordance, ce qui permet de les exprimer à l’aide des copules. Cette formulation leur confère une propriété fondamentale : l’\emph{invariance par transformation strictement croissante} des variables.
+
+\section{Tau de Kendall}
+La version populationnelle du tau de Kendall pour un vecteur \( (X,Y) \) de variables aléatoires continues avec fonction de distribution jointe \( H \) est définie de manière similaire à la fonction de concordance.
+
+\begin{definition}[Tau de Kendall]\label{def:tau}
+    
+Soient \( (X_1, Y_1) \) et \( (X_2, Y_2) \) deux vecteurs de variables aléatoires continues réelles indépendants et identiquement distribués, chacun ayant une fonction de distribution jointe \( H \). La version populationnelle du tau de Kendall est définie comme la probabilité de concordance moins la probabilité de discordance :
+
+\[
+\tau = P[(X_1 - X_2)(Y_1 - Y_2) > 0] - P[(X_1 - X_2)(Y_1 - Y_2) < 0].
+\]
+\end{definition}
+
+\begin{theoreme}\label{thm:tau}
+    
+Soit \( X \) et \( Y \) des variables aléatoires réelles continues dont la copule est \( C \). La version populationnelle du tau de Kendall pour \( X \) et \( Y \) (que nous noterons soit \( \tau_{XY} \), soit \( \tau_C \)) est donnée par
+\[
+\tau_{XY} = \tau_C = Q(C,C) = \int_{I^2} C(u,v) \, dC(u,v).
+\]
+\end{theoreme}
+
+Ainsi, le tau de Kendall est le premier « axe de concordance » dans la figure~\ref{fig:Qcopule}. Notez que l'intégrale peut être interprétée comme la valeur attendue de la fonction \( C(U,V) \) de variables aléatoires uniformes \( U \) et \( V \) sur \( [0,1] \) dont la fonction de distribution conjointe est \( C \), c'est-à-dire
+\[
+\tau_C = 4\mathbb{E}[C(U,V)]-1
+\]
+
+Ainsi, en combinant les équations (1), (5) et (6), on obtient :
+
+\[
+\tau_M = 1, \quad \tau_W = -1, \quad \tau_{\Pi} = 0.
+\]
+
+Autrement dit, tout vecteur aléatoire comonotone possède un tau de Kendall égal à \(+1\), tandis qu’un vecteur contremonotone a un tau de Kendall égal à \(-1\).
+
+\section{Rho de Spearman}
+
+\begin{definition}[Rho de Spearman]\label{def:rho}
+Soient \( X \) et \( Y \) deux variables aléatoires réelles continues et \( F \), \( G \) leurs fonctions de répartition marginales.  
+Le coefficient de Spearman est défini comme suit :
+\[
+\rho_{X,Y} = \frac{\operatorname{Cov}(F(X), G(Y))}{\sqrt{\operatorname{Var}(F(X)) \times \operatorname{Var}(G(Y))}}.
+\]
+Ou, dans la formulation en termes d'un vecteur aléatoire uniforme :
+\[
+\rho_{X,Y} = \frac{\operatorname{Cov}(U, V)}{\sqrt{\operatorname{Var}(U) \times \operatorname{Var}(V)}}.
+\]
+\end{definition}
+
+\subsection{Lien entre le rho de Spearman et les copules}
+
+\begin{theoreme}\label{thm:rho}
+Soient \( X \) et \( Y \) deux variables aléatoires réelles continues dont la copule est \( C \).  
+Alors, la version populationnelle du rho de Spearman (notée \( \rho_{X,Y} \) ou \( \rho_C \)) est donnée par :
+\[
+\rho_{X,Y} = \rho_C = 3Q(C, \Pi),
+\]
+c'est-à-dire :
+\[
+\rho_{X,Y} = 12 \iint_{I^2} uv \, dC(u,v) - 3,
+\]
+ou encore :
+\[
+\rho_{X,Y} = 12 \iint_{I^2} C(u,v) \, du \, dv - 3.
+\]
+\end{theoreme}
+
+\begin{proof}
+ Par la définition~\ref{def:esperance}, on a:
+\[
+\mathbb{E}(UV) = \int_0^1 \int_0^1 uv \, dC(u,v),
+\]
+Puisque \( U \) et \( V \) ont chacun une espérance \( \frac{1}{2} \) et une variance \( \frac{1}{12} \), alors:
+\[
+\rho_{X,Y} = \frac{\mathbb{E}(UV) - \mathbb{E}(U)\mathbb{E}(V)}{\sqrt{\operatorname{Var}(U) \times \operatorname{Var}(V)}} = \frac{\mathbb{E}(UV) - \frac{1}{4}}{\frac{1}{12}}.
+\]
+En simplifiant :
+\[
+\rho_{X,Y} = 12 \left( \mathbb{E}(UV) - \frac{1}{4} \right) = 12 \iint_{I^2} uv \, dC(u,v) - 3.
+\]
+\end{proof}
+Ainsi, le rho de Spearman correspond au deuxième « axe de concordance » dans la figure~\ref{fig:Qcopule}.
+
+Donc, en combinant les équations (2), (4) et (6), on obtient :
+
+\[
+\rho_M = 1, \quad \rho_W = -1, \quad \rho_{\Pi} = 0.
+\]
+
+Autrement dit, tout vecteur aléatoire comonotone possède un rho de Spearman égal à \(+1\), tandis qu’un vecteur contremonotone a un rho de Spearman égal à \(-1\).
+
+\section{Retour sur la problématique initiale}
+Soit \((X, X^2)\) un vecteur aléatoire continu dont la fonction de répartition jointe est notée \(H\). D’après le théorème~\ref{thm:ND_Set}, on a \(H(x, y) = M(F(x), G(y))\), ce qui implique que les variables aléatoires sont comonotones. Par conséquent, les mesures de dépendance \(\rho_S\) de Spearman et \(\tau\) de Kendall attribuent une corrélation de \(1\) à ce vecteur, contrairement au \(\rho_P\) de Pearson qui ne capture pas parfaitement cette forme de dépendance monotone.
+
+\newpage
+
+\chapter*{Conclusion}
+
+Dans ce mémoire, nous nous sommes intéressés à l’étude de la dépendance entre variables aléatoires à travers le cadre des copules.
+
+Nous avons cherché à comprendre comment formaliser mathématiquement la dépendance au-delà du simple cadre linéaire, en explorant le rôle des copules comme outil général de modélisation. Nous nous sommes également interrogés sur les limites de ce formalisme, ainsi que sur les mesures de dépendance que l’on peut exprimer uniquement à partir d’une copule.
+
+Pour ce faire, nous avons introduit la définition mathématique d’une copule et montré comment elle peut être interprétée comme la fonction de répartition jointe d’un vecteur aléatoire uniforme. Le théorème de Sklar a permis d'établir un lien fondamental entre une fonction de répartition multivariée, ses marges et une copule, ce qui a justifié l’intérêt de cet outil dans l’étude de la dépendance. Enfin, dans le cas où les variables aléatoires sont continues, nous avons étudié deux mesures classiques de dépendance — le \emph{tau de Kendall} et le \emph{rho de Spearman} — qui peuvent être exprimées directement en fonction de la copule.
+
+Cependant, ce travail ne constitue qu’une première exploration de la théorie des copules. De nombreuses pistes restent ouvertes, telles que les applications en finance ou en assurance, la modélisation de formes spécifiques de dépendance (par quadrant, en queue, etc.), ainsi que l’étude approfondie des copules archimédiennes et de leurs propriétés.
+
+Ainsi, les copules apparaissent comme un cadre conceptuel unifiant et puissant pour analyser la dépendance, offrant une alternative robuste aux outils traditionnels comme la corrélation de Pearson.
+
+\bigskip
+
+Pour conclure, je tiens à remercier chaleureusement mon promoteur, \textsc{Karim Barigou}, pour sa disponibilité et ses conseils précieux tout au long de ce travail.
+
+
+
+\newpage
+
+\begin{bibdiv}
+\begin{biblist}
+
+\bib{nelsen}{book}{
+   author={Nelsen, Roger B.},
+   title={An Introduction to Copulas},
+   edition={2},
+   series={Springer Series in Statistics},
+   publisher={Springer},
+   place={New York},
+   date={2006},
+}
+
+\bib{marshall}{book}{
+   author={Marshall, Albert W.},
+   title={Lecture Notes-Monograph Series , 1996, Vol. 28, Distributions with Fixed Marginals and Related Topics (1996), pp. 213-222},
+   publisher={Institute of Mathematical Statistics},
+   date={1996},
+   url={https://www.jstor.org/stable/4355894},
+}
+
+\bib{kuleuven}{misc}{
+   author={Dhaele,Jan},
+   author={Linders,Daniël},
+   title={Foundations of Risk Management},
+   publisher={Faculty of Business and economics,KU Leuven}
+   place={Leuven},
+   date={2015},
+}
+
+
+\bib{prp}{book}{
+   author={Gut, Allain},
+   title={Probability: A Graduate Course},
+   publisher={Springer},
+   date={2005},
+   eprint={https://www.usb.ac.ir/FileStaff/5678_2018-9-18-12-55-51.pdf}
+}
+
+\bib{handbook}{book}{
+   author={Concavielli, Thierry},
+   title={Handbook of Financial Risk Management},
+   publisher={Chapman \& Hall/CRC},
+   date={2020},
+}
+
+\bib{lafortelle}{misc}{
+   author={de La Fortelle, Arnaud},
+   title={A study on generalized inverses and increasing functions – Part I: generalized inverses},
+   year={2015},
+   eprint={https://minesparis-psl.hal.science/hal-01255512/},
+}
+
+\bib{embrechts}{article}{
+   author={Embrechts, Paul},
+   author={Hofert, Marius},
+   title={A note on generalized inverses},
+   journal={Mathematical Methods of Operations Research},
+   volume={77},
+   number={3},
+   pages={423--432},
+   date={2013},
+   url={https://people.math.ethz.ch/~embrecht/ftp/generalized_inverse.pdf}
+}
+
+\bib{barigou}{misc}{
+   author={Barigou, Karim},
+   title={Syllabus LMAT1371},
+   note={UCLouvain},
+}
+
+\end{biblist}
+\end{bibdiv}
+
+
+\end{document}
