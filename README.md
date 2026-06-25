@@ -63,6 +63,6 @@ Karim Barigou
 
 ## License
 
-This repository is provided for academic and educational purposes.
+Copyright © 2025 Mateus Felipe Auza Cruz.
 
-If you wish to reuse substantial portions of this work, please provide appropriate attribution.
+This repository is made available for educational and academic purposes. Please cite the original work if you reference or build upon it.
