@@ -32,9 +32,11 @@ This thesis introduces the theoretical foundations of copula theory, develops th
 ```text
 .
 ├── README.md
-├── Projet_fin_bachelier.pdf
-├── Projet_fin_bachelier.tex
 ├── bibliography.bib
+├── Projet_fin_bachelier.tex
+└── docs/
+    ├── Projet_fin_bachelier.pdf
+    └── Presentation_final_Bachelier.pdf
 ```
 
 ## Compilation
