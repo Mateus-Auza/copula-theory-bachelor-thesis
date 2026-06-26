@@ -57,7 +57,7 @@ It is shared for educational, academic, and portfolio purposes only. The content
 
 ## Author
 
-***Mateus Felipe Auza Cruz**
+**Mateus Felipe Auza Cruz**
 
 ## Supervisor
 
